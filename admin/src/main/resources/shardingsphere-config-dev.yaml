@@ -1,0 +1,61 @@
+dataSources:
+  ds_0:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.100.128:3307/links?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123
+
+rules:
+  - !SHARDING
+    tables:
+      t_user:
+        actualDataNodes: ds_0.t_user_${0..15}
+        tableStrategy:
+          standard:
+            shardingColumn: username
+            shardingAlgorithmName: user_table_hash_mod
+      t_group:
+        actualDataNodes: ds_0.t_group_${0..15}
+        tableStrategy:
+          standard:
+            shardingColumn: username
+            shardingAlgorithmName: group_table_hash_mod
+    shardingAlgorithms:
+      user_table_hash_mod:
+        type: HASH_MOD
+        props:
+          sharding-count: 16
+      group_table_hash_mod:
+        type: HASH_MOD
+        props:
+          sharding-count: 16
+  # 定义加密规则
+  - !ENCRYPT
+    # 指定需要加密的表及其列
+    tables:
+      # 对`t_user`表进行加密设置
+      t_user:
+        # 指定需要加密的列
+        columns:
+          # 对`phone`列进行加密，使用`common_encryptor`加密器
+          phone:
+            cipherColumn: phone
+            encryptorName: common_encryptor
+          # 对`mail`列进行加密，使用`common_encryptor`加密器
+          mail:
+            cipherColumn: mail
+            encryptorName: common_encryptor
+        # 设置是否在查询时使用密文列
+        queryWithCipherColumn: true
+    # 定义加密器及其配置
+    encryptors:
+      # 定义名为`common_encryptor`的加密器
+      common_encryptor:
+        # 指定加密器类型为AES
+        type: AES
+        # 设置AES加密器的属性，此处为密钥值
+        props:
+          aes-key-value: yilena
+props:
+  sql-show: true
