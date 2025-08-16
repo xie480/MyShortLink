@@ -1,5 +1,5 @@
 server:
-  port: 15000
+  port: 8000
 
 spring:
   application:
@@ -23,3 +23,12 @@ short-link:
     enable: true
     time-window: 1
     max-access-count: 20
+
+#jwt:
+#  secret: 4b7a5e12fce1f93e79b5094ad103a7c4d8a3f9e5a1c0d2b7e6f1a2c0d3e7f8d
+#  # refresh token 过期时间为7天
+#  refresh-expiration: 604800000
+#  # access token 过期时间为1天
+#  access-expiration: 86400000
+#  # 刷新 token 的时间阈值为1小时
+#  refresh-threshold: 3600000

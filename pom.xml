@@ -30,6 +30,7 @@
 
 
     <dependencies>
+
         <!-- Spring Boot Web 框架支持（MVC、RESTful） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -172,7 +173,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
+            <version>0.12.6</version>
         </dependency>
 
         <!-- fastJson -->

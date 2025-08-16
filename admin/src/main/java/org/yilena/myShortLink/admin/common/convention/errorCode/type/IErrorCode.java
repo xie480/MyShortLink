@@ -1,4 +1,4 @@
-package org.yilena.myShortLink.admin.common.convention.errorCode.codes;
+package org.yilena.myShortLink.admin.common.convention.errorCode.type;
 
 public interface IErrorCode {
     String code();

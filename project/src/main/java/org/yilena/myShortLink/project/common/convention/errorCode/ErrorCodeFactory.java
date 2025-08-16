@@ -1,6 +1,7 @@
-package org.yilena.myShortLink.admin.common.convention.errorCode;
+package org.yilena.myShortLink.project.common.convention.errorCode;
 
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.IErrorCode;
+
+import org.yilena.myShortLink.project.common.convention.errorCode.codes.IErrorCode;
 
 import java.text.MessageFormat;
 

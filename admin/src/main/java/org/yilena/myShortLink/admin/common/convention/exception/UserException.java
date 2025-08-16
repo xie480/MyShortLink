@@ -1,6 +1,6 @@
 package org.yilena.myShortLink.admin.common.convention.exception;
 
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.IErrorCode;
+import org.yilena.myShortLink.admin.common.convention.errorCode.type.IErrorCode;
 import org.yilena.myShortLink.admin.common.convention.errorCode.codes.UserErrorCodes;
 
 public class UserException extends AbstractException {
@@ -23,9 +23,6 @@ public class UserException extends AbstractException {
  
     @Override
     public String toString() {
-        return "ClientException{" +
-                "code='" + errorCode + "'," +
-                "message='" + errorMessage + "'" +
-                '}';
+        return STR."UserException{code='\{errorCode}',message='\{errorMessage}'}";
     }
 }

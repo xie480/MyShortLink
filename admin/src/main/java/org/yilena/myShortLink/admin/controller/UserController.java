@@ -62,7 +62,7 @@ public class UserController {
      */
     @GetMapping("/api/short-link/admin/v1/user/has-username")
     public Result<Boolean> hasUsername(@RequestParam("username") String username) {
-        return Results.success(userService.hasUsername(username));
+        return Results.success(userService.isUsernameExist(username));
     }
 
     /**
@@ -107,4 +107,27 @@ public class UserController {
         userService.logout(username, token);
         return Results.success();
     }
+
+//    // 刷新刷新令牌
+//    @PostMapping("/refresh-token")
+//    public Result<AuthResponse> refreshToken(
+//            @RequestBody RefreshTokenRequest refreshRequest,
+//            HttpServletRequest request
+//    ) throws InterruptedException {
+//        // 刷新令牌（返回新双令牌）
+//        RefreshResult result = tokenSessionService.refreshTokenState(refreshRequest.getRefreshToken(), request);
+//
+//        // 解析新访问令牌信息
+//        Claims accessClaims = tokenProvider.parseToken(result.getAccessToken());
+//
+//        // 构建响应
+//        AuthResponse response = new AuthResponse(
+//                result.getAccessToken(),
+//                result.getRefreshToken(),
+//                "Bearer",
+//                (accessClaims.getExpiration().getTime() - System.currentTimeMillis()) / 1000,
+//                tokenProvider.getRefreshExpiration()
+//        );
+//        return Results.success(response);
+//    }
 }

@@ -1,6 +1,6 @@
 package org.yilena.myShortLink.admin.common.convention.exception;
 
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.IErrorCode;
+import org.yilena.myShortLink.admin.common.convention.errorCode.type.IErrorCode;
 import org.yilena.myShortLink.admin.common.convention.errorCode.codes.RemoteErrorCodes;
 
 public class RemoteException extends AbstractException {
@@ -19,9 +19,6 @@ public class RemoteException extends AbstractException {
  
     @Override
     public String toString() {
-        return "RemoteException{" +
-                "code='" + errorCode + "'," +
-                "message='" + errorMessage + "'" +
-                '}';
+        return STR."RemoteException{code='\{errorCode}',message='\{errorMessage}'}";
     }
 }

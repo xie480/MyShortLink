@@ -46,7 +46,7 @@ public interface UserService extends IService<UserDO> {
      * @param username 用户名
      * @return 用户名存在返回 True，不存在返回 False
      */
-    Boolean hasUsername(String username);
+    Boolean isUsernameExist(String username);
 
     /**
      * 注册用户
@@ -81,9 +81,6 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 退出登录
-     *
-     * @param username 用户名
-     * @param token    用户登录 Token
      */
     void logout(String username, String token);
 }

@@ -1,6 +1,4 @@
-package org.yilena.myShortLink.admin.common.convention.errorCode;
-
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.IErrorCode;
+package org.yilena.myShortLink.project.common.convention.errorCode.codes;
 
 public abstract class AbsErrorCode implements IErrorCode {
     protected final String code;

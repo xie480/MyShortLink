@@ -2,6 +2,7 @@ package org.yilena.myShortLink.admin.common.web;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -11,17 +12,24 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.yilena.myShortLink.admin.common.convention.errorCode.codes.UserErrorCodes;
 import org.yilena.myShortLink.admin.common.convention.exception.AbstractException;
 import org.yilena.myShortLink.admin.common.convention.result.Result;
 import org.yilena.myShortLink.admin.common.convention.result.Results;
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.UserErrorCodes;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
 @Component
-@RestControllerAdvice(basePackages = "org.yilena.myShortLink.admin.common.web")
+@RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(value = {IOException.class, ServletException.class})
+    public Result handleServletException(HttpServletRequest request, Exception ex) {
+        log.error("过滤器异常 [{}] {} ", request.getMethod(), getUrl(request), ex);
+        return Results.failure();
+    }
     
     // 拦截参数验证异常
     @SneakyThrows
