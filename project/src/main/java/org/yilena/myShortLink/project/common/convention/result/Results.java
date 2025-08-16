@@ -1,7 +1,8 @@
 package org.yilena.myShortLink.project.common.convention.result;
 
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.SystemErrorCodes;
-import org.yilena.myShortLink.admin.common.convention.exception.AbstractException;
+
+import org.yilena.myShortLink.project.common.convention.errorCode.codes.SystemErrorCodes;
+import org.yilena.myShortLink.project.common.convention.exception.AbstractException;
 
 import java.util.Optional;
 

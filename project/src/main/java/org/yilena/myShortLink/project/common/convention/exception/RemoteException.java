@@ -1,8 +1,8 @@
 package org.yilena.myShortLink.project.common.convention.exception;
 
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.IErrorCode;
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.RemoteErrorCodes;
-import org.yilena.myShortLink.admin.common.convention.exception.AbstractException;
+
+import org.yilena.myShortLink.project.common.convention.errorCode.codes.IErrorCode;
+import org.yilena.myShortLink.project.common.convention.errorCode.codes.RemoteErrorCodes;
 
 public class RemoteException extends AbstractException {
  
