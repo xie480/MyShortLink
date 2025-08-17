@@ -13,4 +13,6 @@ public final class UserErrorCodes {
     public static final StaticErrorCode USER_LOGIN_PASSWORD_ERROR = new StaticErrorCode("U000006", "用户名或密码错误");
     public static final StaticErrorCode LOGIN_OUT_TIME = new StaticErrorCode("U000007", "登录已过期");
     public static final StaticErrorCode USER_LOGOUT_ERROR = new StaticErrorCode("U000008", "当前账户未登录！");
+    public static final StaticErrorCode GROUP_COUNT_OUT = new StaticErrorCode("U000009", "当前用户已创建组数达到上限");
+    public static final StaticErrorCode GROUP_NOT_EXIST = new StaticErrorCode("U000010", "分组不存在");
 }

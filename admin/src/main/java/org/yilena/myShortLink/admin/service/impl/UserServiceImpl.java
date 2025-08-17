@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
@@ -23,6 +22,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.yilena.myShortLink.admin.common.biz.user.UserContext;
 import org.yilena.myShortLink.admin.common.constant.RedisConstant;
+import org.yilena.myShortLink.admin.common.convention.errorCode.codes.SystemErrorCodes;
 import org.yilena.myShortLink.admin.common.convention.errorCode.codes.UserErrorCodes;
 import org.yilena.myShortLink.admin.common.convention.errorCode.codes.WarningErrorCodes;
 import org.yilena.myShortLink.admin.common.convention.exception.SystemException;
@@ -34,9 +34,13 @@ import org.yilena.myShortLink.admin.entry.DTO.request.UserRegisterReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.request.UserUpdateReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.result.UserLoginRespDTO;
 import org.yilena.myShortLink.admin.entry.DTO.result.UserRespDTO;
+import org.yilena.myShortLink.admin.service.GroupService;
 import org.yilena.myShortLink.admin.service.UserService;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -52,6 +56,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RedissonClient redissonClient;
     private final UserMapper userMapper;
     private final StringRedisTemplate stringRedisTemplate;
+    private final GroupService groupService;
 
     // 一个用户一分钟内使用搜索模块最多为10次
     private static final int ONE_USER_LIMIT = 10;
@@ -250,11 +255,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
             // 插入
             int row = userMapper.insert(userDO);
-
             // 插入失败
             if(Boolean.FALSE.equals(SqlHelper.retBool(row))){
                 throw new UserException(UserErrorCodes.USER_ERROR);
             }
+
+            // 添加短链接默认分组
+            groupService.saveGroup(requestParam.getUsername(), "默认分组");
 
             // 添加到布隆过滤器
             userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
@@ -280,7 +287,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         try {
             LambdaUpdateWrapper<UserDO> updateWrapper = Wrappers.lambdaUpdate(UserDO.class)
                     .eq(UserDO::getUsername, requestParam.getUsername());
-            userMapper.update(BeanUtil.toBean(requestParam, UserDO.class), updateWrapper);
+            int row = userMapper.update(BeanUtil.toBean(requestParam, UserDO.class), updateWrapper);
+            if (Boolean.FALSE.equals(SqlHelper.retBool(row))) {
+                throw new SystemException(SystemErrorCodes.SYSTEM_ERROR);
+            }
         }finally {
             lock.unlock();
         }

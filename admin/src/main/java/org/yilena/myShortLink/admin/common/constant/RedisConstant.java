@@ -20,4 +20,20 @@ public class RedisConstant {
     public static final String USER_LOGIN_KEY = "user:login:%s";
     // 用户更新信息分布式锁
     public static final String USER_UPDATE_LOCK = "lock:user:update_lock:%s";
+
+
+    // 分组保存分布式锁
+    public static final String GROUP_SAVE_LOCK = "lock:group:save_lock:%s";
+    // 分组保存限制
+    public static final String GROUP_SAVE_LIMIT = "limit:group:save_limit";
+    // 分组查询限制
+    public static final String GROUP_SELECT_LIMIT = "limit:group:select_limit";
+    // 分组查询分布式锁
+    public static final String GROUP_SELECT_LOCK = "lock:group:select_lock:%s";
+    // 分组更新分布式锁
+    public static final String GROUP_UPDATE_LOCK = "lock:group:update_lock:%s";
+    // 分组删除分布式锁
+    public static final String GROUP_DELETE_LOCK = "lock:group:delete_lock:%s";
+    // 分组排序分布式锁
+    public static final String GROUP_SORT_LOCK = "lock:group:sort_lock:%s";
 }
