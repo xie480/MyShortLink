@@ -48,6 +48,7 @@ import org.yilena.myShortLink.admin.service.GroupService;
 import org.yilena.myShortLink.admin.utils.DistributedShortIdGenerator;
 
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.StructuredTaskScope;
 
 /**
@@ -255,16 +256,19 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     }
 
     public void sortGroup(List<ShortLinkGroupSortReqDTO> requestParam) {
-        // 使用结构化并发，默认为虚拟线程池
+        // 使用结构化并发，默认为虚拟线程池，最多允许50个任务同时执行
+        Semaphore semaphore = new Semaphore(50);
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // 为每个分组创建并发任务
             List<StructuredTaskScope.Subtask<Void>> futures = requestParam.stream()
-                    .map(item -> scope.fork(() -> updateGroupSortOrder(item)))
+                    .map(item -> scope.fork(() -> updateGroupSortOrder(item, semaphore)))
                     .toList();
 
             // 等待所有任务完成或失败
             try {
                 scope.join();
+                scope.throwIfFailed();
+
             } catch (InterruptedException e) {
                 // 恢复中断
                 Thread.currentThread().interrupt();
@@ -277,24 +281,33 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         }
     }
 
-    private Void updateGroupSortOrder(ShortLinkGroupSortReqDTO item) {
-        String lockKey = String.format(RedisConstant.GROUP_SORT_LOCK, item.getGid());
-        RLock lock = redissonClient.getLock(lockKey);
-
-        if (!lock.tryLock()) {
-            throw new UserException(UserErrorCodes.USER_ERROR);
-        }
+    private Void updateGroupSortOrder(ShortLinkGroupSortReqDTO item, Semaphore semaphore) {
         try {
-            // 更新分组排序信息
-            LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
-                    .eq(GroupDO::getGid, item.getGid())
-                    .eq(GroupDO::getUsername, UserContext.getUsername());
-            // 因为可能存在前后排序一样的情况，所以这里不对结果进行校验
-            groupMapper.update(BeanUtil.toBean(item, GroupDO.class), updateWrapper);
-        }catch (Exception e){
+            // 获得信号量许可
+            semaphore.acquire();
+            String lockKey = String.format(RedisConstant.GROUP_SORT_LOCK, item.getGid());
+            RLock lock = redissonClient.getLock(lockKey);
+
+            if (!lock.tryLock()) {
+                throw new UserException(UserErrorCodes.USER_ERROR);
+            }
+            try {
+                // 更新分组排序信息
+                LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                        .eq(GroupDO::getGid, item.getGid())
+                        .eq(GroupDO::getUsername, UserContext.getUsername());
+                // 因为可能存在前后排序一样的情况，所以这里不对结果进行校验
+                groupMapper.update(BeanUtil.toBean(item, GroupDO.class), updateWrapper);
+            } catch (Exception e) {
+                throw new SystemException(SystemErrorCodes.SYSTEM_ERROR);
+            } finally {
+                lock.unlock();
+            }
+        } catch (Exception e) {
             throw new SystemException(SystemErrorCodes.SYSTEM_ERROR);
-        }finally {
-            lock.unlock();
+        } finally {
+            // 释放信号量
+            semaphore.release();
         }
         return null;
     }
