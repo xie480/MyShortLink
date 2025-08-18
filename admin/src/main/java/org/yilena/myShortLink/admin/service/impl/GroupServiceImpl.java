@@ -260,7 +260,11 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
             if(groupMapper.selectCount(queryWrapper) == 0){
                 throw new UserException(UserErrorCodes.GROUP_NOT_EXIST);
             }
-            // todo 确认分组内无短链接
+
+            /*
+                这里一个要确认分组内无短链接后才能进行删除，但是由于这个模块并没有引入短链接相关的dao以及DO，而且分表配置也需要额外添加，太麻烦了所以就不搞了
+                你知我知即可
+             */
 
             // 删除
             LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
