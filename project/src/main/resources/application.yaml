@@ -1,0 +1,34 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: short-link-admin
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
+  data:
+    redis:
+      host: 192.168.100.128
+      port: 6379
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.100.128:8848
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .vue
+
+short-link:
+  domain:
+    default: yilena.com:8001
+
+#jwt:
+#  secret: 4b7a5e12fce1f93e79b5094ad103a7c4d8a3f9e5a1c0d2b7e6f1a2c0d3e7f8d
+#  # refresh token 过期时间为7天
+#  refresh-expiration: 604800000
+#  # access token 过期时间为1天
+#  access-expiration: 86400000
+#  # 刷新 token 的时间阈值为1小时
+#  refresh-threshold: 3600000

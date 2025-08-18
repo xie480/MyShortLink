@@ -32,7 +32,10 @@ public class UserTransmitFilter implements Filter {
 //            Map<Object, Object> hasLoginMap = stringRedisTemplate.opsForHash().entries(key);
 //            UserDO userDO = BeanUtil.toBean(hasLoginMap.get(token), UserDO.class);
 //            UserInfoDTO userInfoDTO = new UserInfoDTO(String.valueOf(userDO.getId()), userDO.getUsername(), userDO.getRealName());
-            // 为了方便测试直接写死
+            /*
+                这里不知道为什么从redis拿到数据后转Bean总是为null，试了好几种办法都不行，干脆直接写死了
+                如果你能解决的话麻烦告诉我一下为什么上面的代码无法获取成功
+             */
             UserInfoDTO userInfoDTO = new UserInfoDTO("1956363365014097922", "Yilena", "yilena");
         /*
               这里使用嵌套作用域讲整个链放入作用域内，

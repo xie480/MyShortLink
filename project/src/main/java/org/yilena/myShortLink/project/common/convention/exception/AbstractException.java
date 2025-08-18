@@ -1,8 +1,9 @@
 package org.yilena.myShortLink.project.common.convention.exception;
 
+
 import lombok.Getter;
 import org.springframework.util.StringUtils;
-import org.yilena.myShortLink.admin.common.convention.errorCode.codes.IErrorCode;
+import org.yilena.myShortLink.project.common.convention.errorCode.type.IErrorCode;
 
 import java.util.Optional;
 

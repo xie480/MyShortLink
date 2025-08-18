@@ -240,7 +240,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         try{
             // 二次检查用户名是否存在，防止在一判到竞争成功的这段时间被人抢先注册
             if(Boolean.TRUE.equals(isUsernameExist(requestParam.getUsername()))){
-                throw new UserException(UserErrorCodes.USERNAME_ALREADY_EXIST);
+                throw new UserException(UserErrorCodes.USERNAME_ALREADY_EXIST.formatMessage(requestParam.getUsername()));
             }
 
             // 建立DO对象

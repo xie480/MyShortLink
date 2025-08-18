@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ObjectUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
@@ -44,10 +45,13 @@ import org.yilena.myShortLink.admin.entry.DO.GroupDO;
 import org.yilena.myShortLink.admin.entry.DTO.request.ShortLinkGroupSortReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.request.ShortLinkGroupUpdateReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.result.ShortLinkGroupRespDTO;
+import org.yilena.myShortLink.admin.remote.ShortLinkActualRemoteService;
 import org.yilena.myShortLink.admin.service.GroupService;
 import org.yilena.myShortLink.admin.utils.DistributedShortIdGenerator;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.StructuredTaskScope;
 
@@ -63,6 +67,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     private final GroupMapper groupMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService = new ShortLinkActualRemoteService(){};
 
     private static final int GROUP_SAVE_LIMIT_COUNT = 10;
     private static final int GROUP_SELECT_LIMIT_COUNT = 10;
@@ -112,9 +117,13 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                     .username(username)
                     .name(groupName)
                     .build();
-            int row = groupMapper.insert(groupDO);
-            if(Boolean.FALSE.equals(SqlHelper.retBool(row))){
-                throw new SystemException(SystemErrorCodes.SYSTEM_ERROR);
+            try {
+                int row = groupMapper.insert(groupDO);
+                if (Boolean.FALSE.equals(SqlHelper.retBool(row))) {
+                    throw new SystemException(SystemErrorCodes.SYSTEM_ERROR);
+                }
+            }catch (DuplicateKeyException e){
+                throw new UserException(UserErrorCodes.GROUP_EXIST);
             }
 
             /*
@@ -167,8 +176,21 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                     .orderByDesc(GroupDO::getSortOrder)
                     .orderByDesc(GroupDO::getUpdateTime);
             List<GroupDO> groupDOList = groupMapper.selectList(queryWrapper);
+            // 查询分组下的短链数量
+            List<Map<String,Integer>> groupShortLinkCount = shortLinkActualRemoteService.listGroupShortLinkCount(groupDOList.stream().map(GroupDO::getGid).toList());
             // 转换成DTO
-            List<ShortLinkGroupRespDTO> result = groupDOList.stream().map(groupDO -> BeanUtil.toBean(groupDO, ShortLinkGroupRespDTO.class)).toList();
+            List<ShortLinkGroupRespDTO> result = groupDOList.stream().map(groupDO ->
+                    ShortLinkGroupRespDTO.builder()
+                    .gid(groupDO.getGid())
+                    .name(groupDO.getName())
+                    .sortOrder(groupDO.getSortOrder())
+                    .shortLinkCount(groupShortLinkCount.stream()
+                            .filter(item1 -> Objects.equals(String.valueOf(item1.get("gid")), groupDO.getGid()))
+                            .findFirst()
+                            .map(item1 -> item1.get("shortLinkCount"))
+                            .orElse(0)
+                    )
+                    .build()).toList();
             // 添加拦截缓存，使用lua脚本先自增再添加TTL
             String script = """
                     local key = KEYS[1]

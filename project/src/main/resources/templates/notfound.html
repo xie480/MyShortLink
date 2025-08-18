@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>太空漫游 - 404页面</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+      color: #e0e0ff;
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--duration, 4s) infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      position: relative;
+      z-index: 2;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .planet-system {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 2rem auto;
+    }
+
+    .planet {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    .sun {
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, #ffd700, #ff8c00, #ff4500);
+      box-shadow: 0 0 40px #ff8c00, 0 0 80px #ff4500;
+      animation: pulse 4s infinite alternate;
+      z-index: 3;
+    }
+
+    .orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .earth {
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, #4aa3ff, #1e5aa9, #0d2c54);
+      transform-origin: 150px 0;
+      animation: orbit 12s linear infinite;
+      z-index: 2;
+    }
+
+    .moon {
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(145deg, #d0d0d0, #a0a0a0);
+      transform-origin: 30px 0;
+      animation: orbit 4s linear infinite;
+      z-index: 1;
+    }
+
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+    }
+
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(0.9); }
+      100% { transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 8rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(100, 150, 255, 0.7);
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      transition: all 0.5s ease;
+      position: relative;
+    }
+
+    h1:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 30px rgba(100, 200, 255, 0.9);
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      color: #c0c0ff;
+    }
+
+    .control-panel {
+      background: rgba(10, 15, 40, 0.7);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-top: 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+
+    .panel-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: #00f2fe;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      border: none;
+      color: #0f0c29;
+      padding: 12px 28px;
+      font-size: 1.1rem;
+      font-family: 'Orbitron', sans-serif;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 242, 254, 0.6);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(30deg);
+      transition: all 0.5s ease;
+    }
+
+    .btn:hover::after {
+      transform: rotate(30deg) translate(20%, 20%);
+    }
+
+    .astronaut {
+      position: absolute;
+      bottom: 20px;
+      right: 50px;
+      width: 150px;
+      animation: float 8s ease-in-out infinite;
+      z-index: 3;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    .comet {
+      position: absolute;
+      top: 20%;
+      right: -100px;
+      width: 8px;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #fff, #4facfe, #00f2fe);
+      border-radius: 50%;
+      box-shadow: 0 0 20px #00f2fe;
+      animation: comet 12s linear infinite;
+      opacity: 0.8;
+      z-index: 1;
+    }
+
+    @keyframes comet {
+      0% { transform: translateX(0) translateY(0); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateX(-200vw) translateY(200px); opacity: 0; }
+    }
+
+    .signal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255, 0, 0, 0.7);
+      box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+      animation: signal-pulse 2s infinite;
+      opacity: 0;
+      z-index: 0;
+    }
+
+    @keyframes signal-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); opacity: 0.7; }
+      70% { box-shadow: 0 0 0 50px rgba(255, 0, 0, 0); opacity: 0; }
+      100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); opacity: 0; }
+    }
+
+    .terminal {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(100, 150, 255, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1.5rem 0;
+      font-family: monospace;
+      text-align: left;
+      max-width: 600px;
+    }
+
+    .terminal-line {
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      animation: type 0.5s forwards;
+    }
+
+    .terminal-line:nth-child(1) { animation-delay: 1s; }
+    .terminal-line:nth-child(2) { animation-delay: 2s; }
+    .terminal-line:nth-child(3) { animation-delay: 3s; }
+    .terminal-line:nth-child(4) { animation-delay: 4s; }
+
+    @keyframes type {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.2rem;
+      background: #00f2fe;
+      margin-left: 4px;
+      animation: blink 1s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 6rem; }
+      .planet-system { transform: scale(0.8); }
+      .astronaut { display: none; }
+    }
+  </style>
+</head>
+<body>
+<!-- 星空背景 -->
+<div class="stars" id="stars"></div>
+
+<!-- 彗星效果 -->
+<div class="comet" style="top: 15%; animation-delay: 2s;"></div>
+<div class="comet" style="top: 65%; animation-delay: 7s;"></div>
+
+<!-- 宇航员漂浮效果 -->
+<div class="astronaut">
+  <svg viewBox="0 0 512 512">
+    <circle cx="256" cy="256" r="256" fill="#f0f0f0"/>
+    <path d="M256 140c-50 0-90 40-90 90v120c0 50 40 90 90 90s90-40 90-90V230c0-50-40-90-90-90z" fill="#3a3a3a"/>
+    <circle cx="256" cy="160" r="70" fill="#f9dca4"/>
+    <circle cx="226" cy="140" r="15" fill="#3a3a3a"/>
+    <circle cx="286" cy="140" r="15" fill="#3a3a3a"/>
+    <path d="M240 190c0 15 7 28 16 28s16-13 16-28c0-15-7-28-16-28s-16 13-16 28z" fill="#d9a679"/>
+  </svg>
+</div>
+
+<!-- 信号脉冲 -->
+<div class="signal"></div>
+
+<!-- 主内容区 -->
+<div class="container">
+  <h1>404</h1>
+  <h2>页面迷失在太空中</h2>
+
+  <p>
+    我们的探测器无法在宇宙中找到您请求的页面。它可能已被黑洞吞噬，
+    或者被陨石带摧毁。请检查网址是否正确，或者使用导航返回安全区域。
+  </p>
+
+  <!-- 终端动画 -->
+  <div class="terminal">
+    <div class="terminal-line">> 启动系统诊断...</div>
+    <div class="terminal-line">> 扫描目标页面...</div>
+    <div class="terminal-line">> 错误：目标坐标不存在 [ERROR 404]</div>
+    <div class="terminal-line">> 建议：重新定位或返回基地<span class="cursor"></span></div>
+  </div>
+
+  <!-- 行星系统 -->
+  <div class="planet-system">
+    <div class="orbit" style="width: 320px; height: 320px;"></div>
+    <div class="sun"></div>
+    <div class="earth planet">
+      <div class="moon planet"></div>
+    </div>
+  </div>
+
+  <!-- 控制面板 -->
+  <div class="control-panel">
+    <div class="panel-title">导航控制台</div>
+    <div class="nav-buttons">
+      <button class="btn" onclick="window.location.href='/'">返回地球基地</button>
+      <button class="btn" onclick="window.location.href='/contact'">发送求救信号</button>
+      <button class="btn" onclick="window.location.href='/explore'">探索其他星系</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 创建星星背景
+  function createStars() {
+    const starsContainer = document.getElementById('stars');
+    const starCount = 200;
+
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+
+      // 随机位置
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+
+      // 随机大小
+      const size = Math.random() * 3;
+
+      // 随机动画时长
+      const duration = 2 + Math.random() * 5;
+
+      star.style.left = `${x}%`;
+      star.style.top = `${y}%`;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.setProperty('--duration', `${duration}s`);
+      star.style.animationDelay = `${Math.random() * 5}s`;
+
+      starsContainer.appendChild(star);
+    }
+  }
+
+  // 添加鼠标移动视差效果
+  document.addEventListener('mousemove', (e) => {
+    const x = (window.innerWidth - e.pageX * 2) / 100;
+    const y = (window.innerHeight - e.pageY * 2) / 100;
+
+    const planets = document.querySelector('.planet-system');
+    planets.style.transform = `translate(${x}px, ${y}px)`;
+  });
+
+  // 初始化
+  window.addEventListener('load', () => {
+    createStars();
+
+    // 404文字动画
+    const title = document.querySelector('h1');
+    setTimeout(() => {
+      title.style.transform = 'scale(1.05)';
+      title.style.textShadow = '0 0 30px rgba(100, 200, 255, 0.9)';
+    }, 1000);
+
+    // 终端文字动画
+    const lines = document.querySelectorAll('.terminal-line');
+    lines.forEach((line, index) => {
+      setTimeout(() => {
+        line.style.animation = 'type 0.5s forwards';
+      }, (index + 1) * 1000);
+    });
+  });
+</script>
+</body>
+</html>

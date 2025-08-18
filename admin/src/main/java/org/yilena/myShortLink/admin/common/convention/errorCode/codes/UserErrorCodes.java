@@ -15,4 +15,5 @@ public final class UserErrorCodes {
     public static final StaticErrorCode USER_LOGOUT_ERROR = new StaticErrorCode("U000008", "当前账户未登录！");
     public static final StaticErrorCode GROUP_COUNT_OUT = new StaticErrorCode("U000009", "当前用户已创建组数达到上限");
     public static final StaticErrorCode GROUP_NOT_EXIST = new StaticErrorCode("U000010", "分组不存在");
+    public static final StaticErrorCode GROUP_EXIST = new StaticErrorCode("U000011", "分组已存在");
 }

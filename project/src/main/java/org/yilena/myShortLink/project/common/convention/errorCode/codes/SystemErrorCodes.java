@@ -1,9 +1,11 @@
 package org.yilena.myShortLink.project.common.convention.errorCode.codes;
 
 
-import org.yilena.myShortLink.project.common.convention.errorCode.ErrorCodeFactory;
+import org.yilena.myShortLink.project.common.convention.errorCode.type.StaticErrorCode;
 
 public final class SystemErrorCodes {
-
-    public static final IErrorCode SYSTEM_ERROR = ErrorCodeFactory.of("S000001", "请稍后再试~");
+    /*
+        普通错误码
+     */
+    public static final StaticErrorCode SYSTEM_ERROR = new StaticErrorCode("S000001", "系统繁忙~");
 }
