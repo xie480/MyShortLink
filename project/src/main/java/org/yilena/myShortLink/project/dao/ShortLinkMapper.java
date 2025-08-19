@@ -36,4 +36,10 @@ public interface ShortLinkMapper extends BaseMapper<ShortLinkDO> {
 
     @MapKey("gid")
     List<Map<String, Object>> listGroupShortLinkCount(List<String> requestParam);
+
+    List<Long> listIdsByGid(String gid, long offset, long size);
+
+    List<ShortLinkDO> listByIds(List<Long> ids, String gid);
+
+    Long countByGid(String gid);
 }

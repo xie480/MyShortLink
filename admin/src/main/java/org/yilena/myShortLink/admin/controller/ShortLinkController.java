@@ -2,10 +2,7 @@ package org.yilena.myShortLink.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.yilena.myShortLink.admin.common.convention.result.Result;
 import org.yilena.myShortLink.admin.remote.DTO.request.ShortLinkCreateReqDTO;
 import org.yilena.myShortLink.admin.remote.DTO.request.ShortLinkPageReqDTO;
@@ -30,5 +27,11 @@ public class ShortLinkController {
     @GetMapping("/api/short-link/admin/v1/page")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         return shortLinkActualRemoteService.pageShortLink(requestParam);
+    }
+
+    // 获取短链接标题
+    @GetMapping("/api/short-link/v1/title")
+    public Result<String> getTitleByUrl(@RequestParam("url") String url) {
+        return shortLinkActualRemoteService.getTitleByUrl(url);
     }
 }

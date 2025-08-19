@@ -18,7 +18,9 @@
 package org.yilena.myShortLink.admin.remote.DTO.request;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -27,6 +29,8 @@ import java.util.List;
  * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShortLinkRecycleBinPageReqDTO extends Page {
 
     /**

@@ -22,10 +22,13 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.yilena.myShortLink.admin.entry.DO.GroupDO;
 
+import java.util.List;
+
 /**
  * 短链接分组持久层
  * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
 @Mapper
 public interface GroupMapper extends BaseMapper<GroupDO> {
+    List<String> listGroupIdByUsername(String username);
 }

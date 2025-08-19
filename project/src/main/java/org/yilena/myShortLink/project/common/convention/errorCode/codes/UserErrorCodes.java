@@ -20,4 +20,8 @@ public final class UserErrorCodes {
     public static final StaticErrorCode GROUP_COUNT_OUT = new StaticErrorCode("U000009", "当前用户已创建组数达到上限");
     public static final StaticErrorCode GROUP_NOT_EXIST = new StaticErrorCode("U000010", "分组不存在");
     public static final StaticErrorCode SHORT_LINK_NOT_EXIST = new StaticErrorCode("U000011", "短链不存在");
+    public static final StaticErrorCode NOT_FOUND_ERROR = new StaticErrorCode("U000012", "未找到该资源");
+    public static final StaticErrorCode SHORT_LINK_NOT_EXIST_OR_NOT_ENABLE = new StaticErrorCode("U000013", "短链不存在或已禁用");
+    public static final StaticErrorCode SHORT_LINK_NOT_EXIST_OR_ENABLE = new StaticErrorCode("U000014", "短链不存在或已启用");
+    public static final StaticErrorCode SHORT_LINK_IS_ENABLE = new StaticErrorCode("U000015", "已启用的短链无法删除！");
 }
