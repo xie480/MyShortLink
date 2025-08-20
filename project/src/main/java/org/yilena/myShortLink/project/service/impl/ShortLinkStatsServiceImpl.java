@@ -36,6 +36,17 @@ import org.yilena.myShortLink.project.service.ShortLinkStatsService;
 @Service
 @RequiredArgsConstructor
 public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
+
+    /*
+        这个接口就只是查各种统计数据然后封装DO就行了，因为我们是抱着学习新知识的心态来敲项目的，所以这四个代码就看看原方案大概流程走一遍就行了，
+        自己再敲一遍费时费力也学不到东西，
+        然后这里要提一嘴的是，因为原方案都是逐个查询然后汇总，我更推荐使用structuredTaskScope + 虚拟线程池来实现，同时开n个线程并行查询不同类型的统计数据，
+        然后平台线程阻塞获取结果集后快速封装即可，这样依赖数据会快很多
+
+        其次就是两个分页接口，由于这种监控统计数据量一定是非常之多的，所以最好还是做游标分页的查询
+     */
+
+
     @Override
     public ShortLinkStatsRespDTO oneShortLinkStats(ShortLinkStatsReqDTO requestParam) {
         return null;

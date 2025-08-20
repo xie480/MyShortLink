@@ -24,6 +24,15 @@ short-link:
   domain:
     default: yilena.com:8001
 
+rocketmq:
+  name-server: 192.168.100.128:9876 # NameServer 地址
+  producer:
+    group: myShortLink_group
+    send-message-timeout: 2000 # 发送超时时间
+    retry-times-when-send-failed: 1 # 同步发送重试次数
+    retry-times-when-send-async-failed: 1 # 异步发送重试次数
+
+
 #jwt:
 #  secret: 4b7a5e12fce1f93e79b5094ad103a7c4d8a3f9e5a1c0d2b7e6f1a2c0d3e7f8d
 #  # refresh token 过期时间为7天

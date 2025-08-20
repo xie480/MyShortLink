@@ -21,6 +21,7 @@ package org.yilena.myShortLink.project.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Param;
 import org.yilena.myShortLink.project.entry.DO.ShortLinkDO;
 import org.yilena.myShortLink.project.entry.DTO.request.ShortLinkPageReqDTO;
 
@@ -42,4 +43,10 @@ public interface ShortLinkMapper extends BaseMapper<ShortLinkDO> {
     List<ShortLinkDO> listByIds(List<Long> ids, String gid);
 
     Long countByGid(String gid);
+
+    void incrementStats(@Param("gid") String gid,
+                        @Param("fullShortUrl") String fullShortUrl,
+                        @Param("totalPv") Integer totalPv,
+                        @Param("totalUv") Integer totalUv,
+                        @Param("totalUip") Integer totalUip);
 }

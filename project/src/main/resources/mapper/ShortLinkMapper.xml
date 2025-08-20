@@ -56,4 +56,13 @@
           AND del_flag = 0
           AND enable_status = 1
     </select>
+
+    <update id="incrementStats">
+        UPDATE t_link
+        SET total_pv  = total_pv + #{totalPv},
+            total_uv  = total_uv + #{totalUv},
+            total_uip = total_uip + #{totalUip}
+        WHERE gid = #{gid}
+          AND full_short_url = #{fullShortUrl}
+    </update>
 </mapper>

@@ -1,6 +1,6 @@
 package org.yilena.myShortLink.project.common.constant;
 
-public class RedisConstant {
+public final class RedisConstant {
 
     // 查询用户名是否存在的分布式锁
     public static final String USERNAME_ALREADY_EXIST_LOCK = "lock:user:username_already_exist_lock:%s";
@@ -43,4 +43,15 @@ public class RedisConstant {
     public static final String GOTO_IS_NULL_SHORT_LINK_KEY = "goto:is_null_short_link:%s";
     // 短链跳转映射缓存重建分布式锁
     public static final String GOTO_SHORT_LINK_LOCK = "lock:goto:short_link_lock:%s";
+
+    // uv统计缓存
+    public static final String SHORT_LINK_STATS_UV_KEY = "short_link:stats:uv:%s";
+    // uip统计缓存
+    public static final String SHORT_LINK_STATS_UIP_KEY = "short_link:stats:uip:%s";
+    // 统计数据MQ消息重试缓存
+    public static final String SHORT_LINK_STATS_STREAM_MESSAGE_ERROR_SET_KEY = "short_link:stats:stream:message_error_set";
+    // 统计数据相关读写锁
+    public static final String Short_LINK_READ_WRITE_LOCK = "short_link:read_write_lock:%s";
+    // 统计数据MQ未抢到锁的计数拦截缓存
+    public static final String SHORT_LINK_STATS_SKIP_COUNT_KEY = "short_link:stats:skip_count:%s";
 }

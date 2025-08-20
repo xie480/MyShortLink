@@ -15,22 +15,34 @@
  * limitations under the License.
  */
 
-package org.yilena.myShortLink.project.dao;
+package org.yilena.myShortLink.project.mq.producer;
 
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.yilena.myShortLink.project.entry.DO.LinkBrowserStatsDO;
+import lombok.RequiredArgsConstructor;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.stereotype.Component;
+import org.yilena.myShortLink.project.common.constant.MQConstant;
+import org.yilena.myShortLink.project.entry.DTO.request.ShortLinkStatsRecordDTO;
 
 /**
- * 浏览器统计访问持久层
+ * 短链接监控状态保存消息队列生产者
  * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
-public interface LinkBrowserStatsMapper extends BaseMapper<LinkBrowserStatsDO> {
-    @Insert("INSERT INTO " +
-            "t_link_browser_stats (full_short_url, date, cnt, browser, create_time, update_time, del_flag) " +
-            "VALUES( #{linkBrowserStats.fullShortUrl}, #{linkBrowserStats.date}, #{linkBrowserStats.cnt}, #{linkBrowserStats.browser}, NOW(), NOW(), 0) " +
-            "ON DUPLICATE KEY UPDATE cnt = cnt +  #{linkBrowserStats.cnt};")
-    void shortLinkBrowserState(@Param("linkBrowserStats") LinkBrowserStatsDO linkBrowserStatsDO);
+@Component
+@RequiredArgsConstructor
+public class ShortLinkStatsSaveProducer {
+
+    private final RocketMQTemplate rocketMQTemplate;
+
+    /**
+     * 发送延迟消费短链接统计
+     */
+    public void send(ShortLinkStatsRecordDTO shortLinkStatsRecordDTO) {
+        // 直接发送消息，设置3秒超时时间防止消息积压
+        rocketMQTemplate.syncSend(
+                MQConstant.SHORT_LINK_STATS_STREAM_TOPIC_KEY,
+                shortLinkStatsRecordDTO,
+                3000
+        );
+    }
 }
