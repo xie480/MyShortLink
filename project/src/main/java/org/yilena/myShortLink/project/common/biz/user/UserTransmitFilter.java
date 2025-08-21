@@ -23,22 +23,13 @@ public class UserTransmitFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String username = httpServletRequest.getHeader("username");
-        String token = httpServletRequest.getHeader("token");
         String url = httpServletRequest.getRequestURI();
-        // 正则表达式匹配6位后缀
-        if (StrUtil.isNotBlank(username) || url.matches("\\/[A-Za-z0-9]{6}") || url.contains("/page/notfound")){
-//            String key = String.format(RedisConstant.USER_LOGIN_KEY , username);
-//            if(Boolean.FALSE.equals(stringRedisTemplate.hasKey(key))){
-//                throw new UserException(UserErrorCodes.LOGIN_OUT_TIME);
-//            }
-//            Map<Object, Object> hasLoginMap = stringRedisTemplate.opsForHash().entries(key);
-//            UserDO userDO = BeanUtil.toBean(hasLoginMap.get(token), UserDO.class);
-//            UserInfoDTO userInfoDTO = new UserInfoDTO(String.valueOf(userDO.getId()), userDO.getUsername(), userDO.getRealName());
-             /*
-                这里不知道为什么从redis拿到数据后转Bean总是为null，试了好几种办法都不行，干脆直接写死了
-                如果你能解决的话麻烦告诉我一下为什么上面的代码无法获取成功
-             */
-            UserInfoDTO userInfoDTO = new UserInfoDTO("1956363365014097922", "Yilena", "yilena");
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        if (StrUtil.isNotBlank(username) || url.matches("\\/[A-Za-z0-9]{6}") || url.contains("/page/notfound")) {
+            String userId = httpServletRequest.getHeader("userId");
+            String realName = httpServletRequest.getHeader("realName");
+            userInfoDTO = new UserInfoDTO(userId, username, realName);
+        }
         /*
               这里使用嵌套作用域讲整个链放入作用域内，
               因为我们使用了ScopeValue，
@@ -255,4 +246,3 @@ public class UserTransmitFilter implements Filter {
 //        String header = request.getHeader("Authorization");
 //        return header;
 //    }
-}

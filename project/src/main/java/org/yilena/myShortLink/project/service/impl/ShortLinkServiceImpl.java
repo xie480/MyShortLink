@@ -147,7 +147,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .build();
 
         /*
-            原文这里没有使用锁，直接把DB操作暴露在外，有雪崩的风险
+            这里直接把DB操作暴露在外，有雪崩的风险
             但是如果加锁，锁的粒度不好把控，
             所以这里最好做拦截限流，像之前的redis方案，
             但是也可以用sentinel，这种新增的接口最好用sentinel会更好一些
@@ -205,7 +205,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     public ShortLinkCreateRespDTO createShortLinkByLock(ShortLinkCreateReqDTO requestParam) {
         /*
             这个接口就是把原方案中上面的那个创建接口中的布隆过滤器拦截改成锁来保证生成的ID唯一且不会重复插入
-            但是我们修改后的方案完全不需要考虑这些问题，具体原因上面也已经说了
+            但是我们修改后的方案完全不需要考虑这些问题，具体原因上面也已经说了，
+            然后对于分布式锁性能远低于布隆过滤器的原因其实也很简单，就是使用锁的话锁的粒度会很小，并行区域就变得很小，大部分替换为串行处理了，
             所以这个接口也是废弃了
          */
         return null;

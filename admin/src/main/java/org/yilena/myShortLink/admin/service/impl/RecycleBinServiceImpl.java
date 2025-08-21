@@ -18,7 +18,7 @@
 package org.yilena.myShortLink.admin.service.impl;
 
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.yilena.myShortLink.admin.common.biz.user.UserContext;
@@ -40,10 +40,10 @@ import java.util.List;
 public class RecycleBinServiceImpl implements RecycleBinService {
 
     private final GroupMapper groupMapper;
-    private final ShortLinkActualRemoteService shortLinkActualRemoteService = new ShortLinkActualRemoteService(){};
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
     @Override
-    public Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
+    public Result<Page<ShortLinkPageRespDTO>> pageRecycleBinShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
         /*
             这个接口的设计我都懒得喷了……实在是太垃圾了
             感觉不如将project模块的分页查询接口的实体改成游标，然后第一次查询的时候查询该用户所有的分组并把id以toString()转换成字符串存入缓存中，TTL为5min……
@@ -53,6 +53,6 @@ public class RecycleBinServiceImpl implements RecycleBinService {
         // 根据请求头的username查询用户所拥有的分组
         List<String> groupIdList = groupMapper.listGroupIdByUsername(UserContext.getUsername());
         requestParam.setGidList(groupIdList);
-        return shortLinkActualRemoteService.pageRecycleShortLink(requestParam.getGidList(), requestParam.getCurrent(),requestParam.getSize());
+        return shortLinkActualRemoteService.pageRecycleBinShortLink(requestParam.getGidList(), requestParam.getCurrent(),requestParam.getSize());
     }
 }

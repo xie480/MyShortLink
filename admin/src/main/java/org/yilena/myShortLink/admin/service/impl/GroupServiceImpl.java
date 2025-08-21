@@ -39,18 +39,19 @@ import org.yilena.myShortLink.admin.common.convention.errorCode.codes.SystemErro
 import org.yilena.myShortLink.admin.common.convention.errorCode.codes.UserErrorCodes;
 import org.yilena.myShortLink.admin.common.convention.exception.SystemException;
 import org.yilena.myShortLink.admin.common.convention.exception.UserException;
+import org.yilena.myShortLink.admin.common.convention.result.Result;
 import org.yilena.myShortLink.admin.common.enums.InstanceEnums;
 import org.yilena.myShortLink.admin.dao.GroupMapper;
 import org.yilena.myShortLink.admin.entry.DO.GroupDO;
 import org.yilena.myShortLink.admin.entry.DTO.request.ShortLinkGroupSortReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.request.ShortLinkGroupUpdateReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.result.ShortLinkGroupRespDTO;
+import org.yilena.myShortLink.admin.remote.DTO.result.ShortLinkGroupCountQueryRespDTO;
 import org.yilena.myShortLink.admin.remote.ShortLinkActualRemoteService;
 import org.yilena.myShortLink.admin.service.GroupService;
 import org.yilena.myShortLink.admin.utils.DistributedShortIdGenerator;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.StructuredTaskScope;
@@ -67,7 +68,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     private final GroupMapper groupMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
-    private final ShortLinkActualRemoteService shortLinkActualRemoteService = new ShortLinkActualRemoteService(){};
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
     private static final int GROUP_SAVE_LIMIT_COUNT = 10;
     private static final int GROUP_SELECT_LIMIT_COUNT = 10;
@@ -177,17 +178,17 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                     .orderByDesc(GroupDO::getUpdateTime);
             List<GroupDO> groupDOList = groupMapper.selectList(queryWrapper);
             // 查询分组下的短链数量
-            List<Map<String,Integer>> groupShortLinkCount = shortLinkActualRemoteService.listGroupShortLinkCount(groupDOList.stream().map(GroupDO::getGid).toList());
+            Result<List<ShortLinkGroupCountQueryRespDTO>> groupShortLinkCount = shortLinkActualRemoteService.listGroupShortLinkCount(groupDOList.stream().map(GroupDO::getGid).toList());
             // 转换成DTO
             List<ShortLinkGroupRespDTO> result = groupDOList.stream().map(groupDO ->
                     ShortLinkGroupRespDTO.builder()
                     .gid(groupDO.getGid())
                     .name(groupDO.getName())
                     .sortOrder(groupDO.getSortOrder())
-                    .shortLinkCount(groupShortLinkCount.stream()
-                            .filter(item1 -> Objects.equals(String.valueOf(item1.get("gid")), groupDO.getGid()))
+                    .shortLinkCount(groupShortLinkCount.getData().stream()
+                            .filter(item1 -> Objects.equals(String.valueOf(item1.getGid()), groupDO.getGid()))
                             .findFirst()
-                            .map(item1 -> item1.get("shortLinkCount"))
+                            .map(ShortLinkGroupCountQueryRespDTO::getShortLinkCount)
                             .orElse(0)
                     )
                     .build()).toList();

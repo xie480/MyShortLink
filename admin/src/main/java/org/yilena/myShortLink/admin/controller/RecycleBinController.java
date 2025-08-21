@@ -18,7 +18,7 @@
 package org.yilena.myShortLink.admin.controller;
 
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +43,7 @@ import org.yilena.myShortLink.admin.service.RecycleBinService;
 public class RecycleBinController {
 
     private final RecycleBinService recycleBinService;
-    private final ShortLinkActualRemoteService shortLinkActualRemoteService = new ShortLinkActualRemoteService(){};
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
     /**
      * 保存回收站
@@ -58,7 +58,7 @@ public class RecycleBinController {
      * 分页查询回收站短链接
      */
     @GetMapping("/api/short-link/admin/v1/recycle-bin/page")
-    public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
+    public Result<Page<ShortLinkPageRespDTO>> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
         return recycleBinService.pageRecycleBinShortLink(requestParam);
     }
 

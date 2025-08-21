@@ -18,7 +18,7 @@
 package org.yilena.myShortLink.admin.service;
 
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.yilena.myShortLink.admin.common.convention.result.Result;
 import org.yilena.myShortLink.admin.remote.DTO.request.ShortLinkRecycleBinPageReqDTO;
 import org.yilena.myShortLink.admin.remote.DTO.result.ShortLinkPageRespDTO;
@@ -35,5 +35,5 @@ public interface RecycleBinService {
      * @param requestParam 请求参数
      * @return 返回参数包装
      */
-    Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinShortLink(ShortLinkRecycleBinPageReqDTO requestParam);
+    Result<Page<ShortLinkPageRespDTO>> pageRecycleBinShortLink(ShortLinkRecycleBinPageReqDTO requestParam);
 }

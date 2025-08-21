@@ -15,26 +15,30 @@
  * limitations under the License.
  */
 
-package org.yilena.myShortLink.admin;
+package org.yilena.myShortLink.gateway.dto;
 
-
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * 短链接后管应用
+ * 网关错误返回信息
  * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
-@SpringBootApplication
-@EnableDiscoveryClient
-@EnableFeignClients("org.yilena.myShortLink.admin.remote")
-@MapperScan("org.yilena.myShortLink.admin.dao")
-public class ShortLinkAdminApplication {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class GatewayErrorResult {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ShortLinkAdminApplication.class, args);
-    }
+    /**
+     * HTTP 状态码
+     */
+    private Integer status;
+
+    /**
+     * 返回信息
+     */
+    private String message;
 }

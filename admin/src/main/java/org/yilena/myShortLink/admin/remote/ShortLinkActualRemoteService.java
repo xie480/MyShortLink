@@ -1,100 +1,169 @@
 package org.yilena.myShortLink.admin.remote;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.yilena.myShortLink.admin.common.convention.result.Result;
+import org.yilena.myShortLink.admin.config.OpenFeignConfiguration;
 import org.yilena.myShortLink.admin.entry.DTO.request.RecycleBinRecoverReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.request.RecycleBinRemoveReqDTO;
 import org.yilena.myShortLink.admin.entry.DTO.request.RecycleBinSaveReqDTO;
-import org.yilena.myShortLink.admin.remote.DTO.request.ShortLinkCreateReqDTO;
-import org.yilena.myShortLink.admin.remote.DTO.request.ShortLinkPageReqDTO;
-import org.yilena.myShortLink.admin.remote.DTO.result.ShortLinkCreateRespDTO;
-import org.yilena.myShortLink.admin.remote.DTO.result.ShortLinkPageRespDTO;
+import org.yilena.myShortLink.admin.remote.DTO.request.*;
+import org.yilena.myShortLink.admin.remote.DTO.result.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+@FeignClient(
+        value = "short-link-project",
+        url = "${aggregation.remote-url:}",
+        configuration = OpenFeignConfiguration.class
+)
 public interface ShortLinkActualRemoteService {
 
-    // 创建短链接
-    default Result<ShortLinkCreateRespDTO> createShortLink(ShortLinkCreateReqDTO requestParam) {
-        Map<String, Object> requestParamMap = BeanUtil.beanToMap(requestParam);
-        String result = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/create", requestParamMap);
-        return JSON.parseObject(result, new TypeReference<>() {});
-    }
+    /**
+     * 创建短链接
+     *
+     * @param requestParam 创建短链接请求参数
+     * @return 短链接创建响应
+     */
+    @PostMapping("/api/short-link/v1/create")
+    Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam);
 
-    // 分页查询短链接
-    default Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
-        Map<String, Object> requestParamMap = BeanUtil.beanToMap(requestParam);
-        String result = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/page", requestParamMap);
-        return JSON.parseObject(result, new TypeReference<>() {});
-    }
+    /**
+     * 批量创建短链接
+     *
+     * @param requestParam 批量创建短链接请求参数
+     * @return 短链接批量创建响应
+     */
+    @PostMapping("/api/short-link/v1/create/batch")
+    Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(@RequestBody ShortLinkBatchCreateReqDTO requestParam);
 
-    // 统计分组内短链接的数量
-    default List<Map<String, Integer>> listGroupShortLinkCount(List<String> requestParam) {
-        Map<String, Object> requestParamMap = BeanUtil.beanToMap(requestParam);
-        String result = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/count", requestParamMap);
-        JSONObject jsonObject = JSON.parseObject(result);
-        if(ObjectUtil.isNull(jsonObject)){
-            return List.of();
-        }
-        return ObjectUtil.defaultIfNull(jsonObject.getObject("data", new TypeReference<List<Map<String, Integer>>>() {}.getType()), List.of());
-    }
+    /**
+     * 修改短链接
+     *
+     * @param requestParam 修改短链接请求参数
+     */
+    @PostMapping("/api/short-link/v1/update")
+    void updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam);
 
-    // 获取网站标题
-    default Result<String> getTitleByUrl(String url) {
-        Map<String, Object> requestParamMap = BeanUtil.beanToMap(url);
-        String result = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title", requestParamMap);
-        return JSON.parseObject(result, new TypeReference<>() {});
-    }
+    /**
+     * 分页查询短链接
+     *
+     * @param gid      分组标识
+     * @param orderTag 排序类型
+     * @param current  当前页
+     * @param size     当前数据多少
+     * @return 查询短链接响应
+     */
+    @GetMapping("/api/short-link/v1/page")
+    Result<Page<ShortLinkPageRespDTO>> pageShortLink(@RequestParam("gid") String gid,
+                                                     @RequestParam("orderTag") String orderTag,
+                                                     @RequestParam("current") Long current,
+                                                     @RequestParam("size") Long size);
+
+    /**
+     * 查询分组短链接总量
+     *
+     * @param requestParam 分组短链接总量请求参数
+     * @return 查询分组短链接总量响应
+     */
+    @GetMapping("/api/short-link/v1/count")
+    Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(@RequestParam("requestParam") List<String> requestParam);
+
+    /**
+     * 根据 URL 获取标题
+     *
+     * @param url 目标网站地址
+     * @return 网站标题
+     */
+    @GetMapping("/api/short-link/v1/title")
+    Result<String> getTitleByUrl(@RequestParam("url") String url);
 
     /**
      * 保存回收站
+     *
+     * @param requestParam 请求参数
      */
-    default Result<Void> saveRecycleBin(@RequestBody RecycleBinSaveReqDTO requestParam) {
-        Map<String, Object> requestParamMap = BeanUtil.beanToMap(requestParam);
-        String result = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/save", requestParamMap);
-        return JSON.parseObject(result, new TypeReference<>() {});
-    }
+    @PostMapping("/api/short-link/v1/recycle-bin/save")
+    void saveRecycleBin(@RequestBody RecycleBinSaveReqDTO requestParam);
 
     /**
      * 分页查询回收站短链接
+     *
+     * @param gidList 分组标识集合
+     * @param current 当前页
+     * @param size    当前数据多少
+     * @return 查询短链接响应
      */
-    default Result<IPage<ShortLinkPageRespDTO>> pageRecycleShortLink(@RequestParam("gidList") List<String> gidList,
-                                                                     @RequestParam("current") Long current,
-                                                                     @RequestParam("size") Long size) {
-        Map<String, Object> requestParamMap = new HashMap<>();
-        requestParamMap.put("gidList", gidList);
-        requestParamMap.put("current", current);
-        requestParamMap.put("size", size);
-        String result = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/page", requestParamMap);
-        // 真是想提一嘴，这个接口写的又垃圾又垃圾，真的是垃圾中的垃圾，原方案的设计也太不经大脑思考了
-        return JSON.parseObject(result, new TypeReference<>() {});
-    }
+    @GetMapping("/api/short-link/v1/recycle-bin/page")
+    Result<Page<ShortLinkPageRespDTO>> pageRecycleBinShortLink(@RequestParam("gidList") List<String> gidList,
+                                                               @RequestParam("current") Long current,
+                                                               @RequestParam("size") Long size);
 
     /**
      * 恢复短链接
+     *
+     * @param requestParam 短链接恢复请求参数
      */
-    default Result<Void> recoverRecycleBin(@RequestBody RecycleBinRecoverReqDTO requestParam) {
-        Map<String, Object> requestParamMap = BeanUtil.beanToMap(requestParam);
-        String result = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/recover", requestParamMap);
-        return JSON.parseObject(result, new TypeReference<>() {});
-    }
+    @PostMapping("/api/short-link/v1/recycle-bin/recover")
+    void recoverRecycleBin(@RequestBody RecycleBinRecoverReqDTO requestParam);
 
     /**
      * 移除短链接
+     *
+     * @param requestParam 短链接移除请求参数
      */
-    default Result<Void> removeRecycleBin(@RequestBody RecycleBinRemoveReqDTO requestParam) {
-        Map<String, Object> requestParamMap = BeanUtil.beanToMap(requestParam);
-        String result = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/remove", requestParamMap);
-        return JSON.parseObject(result, new TypeReference<>() {});
-    }
+    @PostMapping("/api/short-link/v1/recycle-bin/remove")
+    void removeRecycleBin(@RequestBody RecycleBinRemoveReqDTO requestParam);
+
+
+    /**
+     * 访问单个短链接指定时间内监控数据
+     *
+     * @param fullShortUrl 完整短链接
+     * @param gid          分组标识
+     * @param startDate    开始时间
+     * @param endDate      结束时间
+     * @return 短链接监控信息
+     */
+    @GetMapping("/api/short-link/v1/stats")
+    Result<ShortLinkStatsRespDTO> oneShortLinkStats(@RequestParam("fullShortUrl") String fullShortUrl,
+                                                    @RequestParam("gid") String gid,
+                                                    @RequestParam("enableStatus") Integer enableStatus,
+                                                    @RequestParam("startDate") String startDate,
+                                                    @RequestParam("endDate") String endDate);
+
+    /**
+     * 访问分组短链接指定时间内监控数据
+     *
+     */
+    @GetMapping("/api/short-link/v1/stats/group")
+    Result<ShortLinkStatsRespDTO> groupShortLinkStats(@SpringQueryMap ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 访问单个短链接指定时间内监控访问记录数据
+     */
+    @GetMapping("/api/short-link/v1/stats/access-record")
+    Result<Page<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(@SpringQueryMap ShortLinkGroupStatsAccessRecordReqDTO requestParam);
+
+    /**
+     * 访问分组短链接指定时间内监控访问记录数据
+     *
+     * @param gid       分组标识
+     * @param startDate 开始时间
+     * @param endDate   结束时间
+     * @param current   当前页
+     * @param size      一页数据量
+     * @return 分组短链接监控访问记录信息
+     */
+    @GetMapping("/api/short-link/v1/stats/access-record/group")
+    Result<Page<ShortLinkStatsAccessRecordRespDTO>> groupShortLinkStatsAccessRecord(@RequestParam("gid") String gid,
+                                                                                    @RequestParam("startDate") String startDate,
+                                                                                    @RequestParam("endDate") String endDate,
+                                                                                    @RequestParam("current") Long current,
+                                                                                    @RequestParam("size") Long size);
 }
