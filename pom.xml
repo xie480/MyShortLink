@@ -30,6 +30,18 @@
 
 
     <dependencies>
+        <!-- Sentinel 框架 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+
+        <!-- Sentinel 单机框架 -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-annotation-aspectj</artifactId>
+        </dependency>
+
         <!-- jsoup -->
         <dependency>
             <groupId>org.jsoup</groupId>

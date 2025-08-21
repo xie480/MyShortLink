@@ -96,7 +96,24 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Transactional
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
-        // todo 原始链接的校验
+        /*
+            原始链接的校验
+
+            关于这个方法我一开始还以为能学到一些什么东西，结果就只是通过遍历合法域名来判断是否是白名单内的域名而已……
+
+            但我也基本查了一下，如果想要自己写的话基本也就只能是比对本地的黑白名单
+            想要更加精准的话必须引入第三方API，所以这个其实并不是多高级的知识，但我们也可以分析一下引入API的方案思路：
+            当请求打进来时：
+            1. 判断网址格式是否正确
+            1.1 不正确：直接打回
+            1.2 继续下一步
+            2. 提前将黑名单域名进行缓存预热，然后在这里我们进行匹配
+            2.1 匹配成功：直接打回
+            2.2 继续下一步
+            3. 接着就是使用第三方API进行校验
+            3.1 判断为危险，域名放入黑名单并打回
+            3.2 通过
+         */
 
         /*
             生成随机后缀，这里我们采用哈希 + 雪花 + Base62 方案生成6位随机后缀
@@ -157,7 +174,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
         /*
             原方案这里需要放入布隆过滤器，但是我们在生成后缀的时候使用了原方案的布隆过滤器，所以这里我们就不需要使用了
-            为什么不像原方案在生成后缀后用完整url放入布隆过滤器进行校验？因为长字符串进行哈希的效率会比较慢，我们这里应该最大化提高并发性能
          */
 
         // 放入goto隐射表
@@ -187,11 +203,24 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     @Override
     public ShortLinkCreateRespDTO createShortLinkByLock(ShortLinkCreateReqDTO requestParam) {
+        /*
+            这个接口就是把原方案中上面的那个创建接口中的布隆过滤器拦截改成锁来保证生成的ID唯一且不会重复插入
+            但是我们修改后的方案完全不需要考虑这些问题，具体原因上面也已经说了
+            所以这个接口也是废弃了
+         */
         return null;
     }
 
     @Override
     public ShortLinkBatchCreateRespDTO batchCreateShortLink(ShortLinkBatchCreateReqDTO requestParam) {
+        /*
+            这个接口的话，原方案大概就是逐个遍历短链接，然后调用上面那个创建单条短链接的接口，最后封装返回记录，不得不说设计的很垃圾
+            要我重构的话，我会先对传参的短链接list进行分片，然后在structuredTaskScope里并行化处理，
+            具体处理流程则是先创建一个队列或者直接用异步回调，并行代码块里逐个生成唯一后缀封装成DO放入队列中，当队列长度到达一定长度后，
+            批量地插入DB然后存缓存，再将该批结果封装放入结果集，再清空队列等待下一批次……
+            这才是叫批量创建，而不是一个套皮的接口，
+            这个跟之前那个牛券的Excel导入接口很像，所以这里就不写了，因为也学不到新东西
+         */
         return null;
     }
 
@@ -637,6 +666,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Override
     public void shortLinkStats(ShortLinkStatsRecordDTO shortLinkStatsRecord) {
         // DB层进行异步处理
-        shortLinkStatsSaveProducer.send(shortLinkStatsRecord);
+        //shortLinkStatsSaveProducer.send(shortLinkStatsRecord);
     }
 }

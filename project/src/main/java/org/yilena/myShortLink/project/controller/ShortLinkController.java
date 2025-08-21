@@ -18,6 +18,7 @@
 package org.yilena.myShortLink.project.controller;
 
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -34,6 +35,7 @@ import org.yilena.myShortLink.project.entry.DTO.result.ShortLinkCreateRespDTO;
 import org.yilena.myShortLink.project.entry.DTO.result.ShortLinkGroupCountQueryRespDTO;
 import org.yilena.myShortLink.project.entry.DTO.result.ShortLinkPageRespDTO;
 import org.yilena.myShortLink.project.service.ShortLinkService;
+import org.yilena.myShortLink.project.service.handler.RestoreShortLinkBlockHandler;
 
 import java.util.List;
 
@@ -51,6 +53,11 @@ public class ShortLinkController {
      * 短链接跳转原始链接
      */
     @GetMapping("/{short-uri}")
+    @SentinelResource(
+            value = "restore_short-link",
+            blockHandler = "handle",
+            blockHandlerClass = RestoreShortLinkBlockHandler.class
+    )
     public void restoreUrl(@PathVariable("short-uri") String shortUri, ServletRequest request, ServletResponse response) {
         shortLinkService.restoreUrl(shortUri, request, response);
     }
