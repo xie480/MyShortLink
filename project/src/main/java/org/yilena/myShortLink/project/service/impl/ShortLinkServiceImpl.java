@@ -269,7 +269,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             RLock writeLock = readWriteLock.writeLock();
             // 尝试获取锁，3s超时
             try {
-                if(Boolean.FALSE.equals(writeLock.tryLock(3, TimeUnit.SECONDS))){
+                /*
+                    视频中后续将这个tryLock()去掉了，因为如果在修改的短链接高并发访问的情况下，我们这个修改线程很难拿到写锁，导致一直返回修改错误，
+                    但是由于MQ消费匀速，所以我们这边可以阻塞获取锁，因为阻塞时间很短也可以接受
+
+                    但是原方案依旧忘记考虑一个问题，也是和消费者那边相同的问题：持锁线程意外阻塞了怎么办？
+
+                    所以合理的方法依旧是设置等待和超时时间，防止锁意外阻塞的同时不频繁给用户返回错误
+                 */
+                if(Boolean.FALSE.equals(writeLock.tryLock(1, 1, TimeUnit.SECONDS))){
                     // 没抢到锁则证明正在统计中
                     throw new SystemException(SystemErrorCodes.SYSTEM_ERROR);
                 }

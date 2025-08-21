@@ -26,6 +26,7 @@ import org.yilena.myShortLink.project.common.constant.RedisConstant;
 import org.yilena.myShortLink.project.common.convention.errorCode.codes.SystemErrorCodes;
 import org.yilena.myShortLink.project.common.convention.errorCode.codes.WarningErrorCodes;
 import org.yilena.myShortLink.project.common.convention.exception.SystemException;
+import org.yilena.myShortLink.project.common.convention.exception.UserException;
 import org.yilena.myShortLink.project.dao.*;
 import org.yilena.myShortLink.project.entry.DO.*;
 import org.yilena.myShortLink.project.entry.DTO.request.ShortLinkStatsRecordDTO;
@@ -101,10 +102,21 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<ShortLinkSta
         try{
             // 处理消息
             shortLinkStatsSaveConsumer.dealMessage(shortLinkStatsRecord);
+        }catch (UserException e){
+            /*
+                这里是当跳过次数超过20次会抛出的异常，对于这类消息我们不放入延迟队列，
+                因为首先MQ的匀速消费性质，这个异常几乎不会被抛出，就算真的抛出了也很难会有很多消息因此消费失败
+                而且我们的等待锁时间和持有锁时间是相同的，所以这个问题更加不太可能发生了
+                不过预防万一我们还是得处理一下的，因为数量不多，而且也是因为没能抢到锁才抛出的异常，
+                所以我们直接抛出异常让MQ进行重试即可，注意这里的错误码是告警错误码，
+                正如我上面所说，执行到这一块的概率极低，只有在极端情况，比如说redis宕机导致获取不到锁，这类问题肯定得立即告警进行人工处理
+             */
+            throw e;
         }catch (Exception e){
             log.error("消费短链接统计数据失败：{}", e.getMessage());
             // 删除幂等性缓存
-            messageQueueIdempotentHandler.delMessageProcessed(uv);/*
+            messageQueueIdempotentHandler.delMessageProcessed(uv);
+            /*
                这里抛出异常的话确实会有不断重试导致消息积压的风险，因为我们这个接口的流量是非常非常大的，但是因为我们这种消息并不讲究实时性，所以可以考虑将抛出异常的语句放入延时队列里，
                延时时间可以选择在凌晨流量谷底的时间段，将所有异常在那个时候抛出然后进行重试，这样就可以能避免因业务异常导致的大量重试消息与新消息堆积在一起的积压问题，
                开辟一个新的主题核消费者组，将当前消息延时放入其队列中，然后时间到了后再由那个队列转发给本队列来，
@@ -115,6 +127,12 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<ShortLinkSta
             */
             // 放入set缓存
             Long success = stringRedisTemplate.opsForSet().add(RedisConstant.SHORT_LINK_STATS_STREAM_MESSAGE_ERROR_SET_KEY, uv);
+            /*
+                这里的TTL应该使用lua脚本，但是我懒得写了，你知我知就行了
+
+                为什么要设置TTL？与我们下面等待获取锁失败直接跳过统计一样的原因，我们这个接口不讲究
+             */
+            stringRedisTemplate.expire(RedisConstant.SHORT_LINK_STATS_STREAM_MESSAGE_ERROR_SET_KEY, 1, TimeUnit.DAYS);
             // 如果放入成功
             if(Boolean.TRUE.equals(ObjectUtil.isNotNull(success) && success > 0L)){
                 // 放入延时队列逻辑省略……
@@ -126,6 +144,9 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<ShortLinkSta
                 throw new SystemException(SystemErrorCodes.MQ_RETRY.formatMessage(e.getMessage()));
             }
         }
+        // 如果是重试消息消费成功的话则需要删除原本的缓存，这样的话拿set的缓存也可以作为死信队列来看待
+        stringRedisTemplate.opsForSet().remove(RedisConstant.SHORT_LINK_STATS_STREAM_MESSAGE_ERROR_SET_KEY, uv);
+
         // 消费完成
         messageQueueIdempotentHandler.setAccomplish(uv);
     }
@@ -134,20 +155,30 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<ShortLinkSta
     public void dealMessage(ShortLinkStatsRecordDTO statsRecord) {
         // 获取短链接
         String fullShortUrl = statsRecord.getFullShortUrl();
-        // 使用写锁，阻塞其他写操作，防止在处理消息的过程中短链接的gid被篡改导致插入的统计数据失效
+        // 使用读锁，阻塞其他写操作，防止在处理消息的过程中短链接的gid被篡改导致插入的统计数据失效
         RReadWriteLock rReadWriteLock = redissonClient.getReadWriteLock(String.format(RedisConstant.Short_LINK_READ_WRITE_LOCK, fullShortUrl));
-        RLock readLock = rReadWriteLock.writeLock();
+        RLock readLock = rReadWriteLock.readLock();
         try {
             /*
                 尝试获取锁，等待时间为3s，不使用看门狗，防止阻塞线程
+
+                视频有一节将这里的无等待无超时的tryLock去掉了，原因是MQ为匀速消费，并行的线程固定，所以竞争的压力会小一些，
+                原方案在获取锁失败时会将其放入redis的延时队列，等待后续拿到锁为止，这是为了担心消费者线程被阻塞导致吞吐量断崖式下降，
+                但实际锁竞争力度并不大，所以可以通过lock()阻塞获取锁，因为阻塞的时间很短，没必要引入一个延迟队列
+
+                那为什么我没有去掉呢，因为原方案忘记考虑一个问题了，假设拿到锁的线程在执行逻辑的过程中网络突然变得很差，使网络IO请求耗时过长，
+                那这个时候不还是导致了消费者线程阻塞时间过久吗？
+                所以合理的方案就是使用tryLock()，设置超时和等待时间，不使用看门狗模式，这样就完美解决阻塞问题了
+
+                至于修改短链接那边占用写锁时间过长导致这里获取不到读锁的问题就交给那边的逻辑来解决
              */
-            if(Boolean.FALSE.equals(readLock.tryLock(3, 3, TimeUnit.SECONDS))){
+            if(Boolean.FALSE.equals(readLock.tryLock(1, 1, TimeUnit.SECONDS))){
                 // 还没抢到的话就直接抛弃掉，因为我们这个并不讲究精准性
                 // 监控一分钟内的跳过次数，如果超过20次则进行告警处理
                 Long count = stringRedisTemplate.opsForValue().increment(String.format(RedisConstant.SHORT_LINK_STATS_SKIP_COUNT_KEY, fullShortUrl));
                 if(count > 20){
                     log.error("短链接跳过次数超过20次，请及时处理：{}", fullShortUrl);
-                    throw new SystemException(WarningErrorCodes.MQ_SKIP_COUNT_EXCEED_20.formatMessage(MQConstant.SHORT_LINK_STATS_STREAM_TOPIC_KEY));
+                    throw new UserException(WarningErrorCodes.MQ_SKIP_COUNT_EXCEED_20.formatMessage(MQConstant.SHORT_LINK_STATS_STREAM_TOPIC_KEY));
                 }
                 return;
             }
